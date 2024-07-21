@@ -97,18 +97,41 @@ public class ModEventHandler {
     }
 
     @SubscribeEvent
-    public static void left(PlayerEvent.PlayerLoggedOutEvent event) {
-        event.getEntity().sendSystemMessage(Component.literal(event.getEntity().getGameProfile().getName() + " has wimped out!"));
-        sentInitialMessage = false;
+    public static void joined(PlayerEvent.PlayerLoggedInEvent event) {
         initialDelayApplied = false;
         sentCloserAlert = false;
-    }
 
-    @SubscribeEvent
-    public static void joined(PlayerEvent.PlayerLoggedInEvent event) {
+        if (ismodEnabled) {
+            if (!event.getEntity().isDeadOrDying()) {
+                List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
+
+                for (int i = 0; i < players.size(); i++) {
+                    ServerPlayer plr = players.get(i);
+                    plr.sendSystemMessage(Component.literal(event.getEntity().getGameProfile().getName() +
+                            " has joined! Mobs will continue to spawn in " + initialDelayConfig + " seconds!"));
+                }
+
+                //event.getEntity().sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
+            }
+        } else {
+            if (!sendAlertConfig) {
+                sendModAlert();
+                sendAlertConfig = true;
+            }
+        }
+
+        /*
         if (ismodEnabled) {
             if (!sentInitialMessage) {
                 if (!event.getEntity().isDeadOrDying()) {
+                    List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
+
+                    for (int i = 0; i < players.size(); i++) {
+                        ServerPlayer plr = players.get(i);
+                        plr.sendSystemMessage(Component.literal(event.getEntity().getGameProfile().getName() +
+                                " joined! Mobs will continue to spawn in " + initialDelayConfig + " seconds!"));
+                    }
+
                     event.getEntity().sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
                     sentInitialMessage = true;
                 }
@@ -119,6 +142,8 @@ public class ModEventHandler {
                 sendAlertConfig = true;
             }
         }
+
+         */
     }
 
     private static void closerAlert() {
@@ -126,7 +151,8 @@ public class ModEventHandler {
 
         for (int i = 0; i < players.size(); i++) {
             ServerPlayer plr = players.get(i);
-            plr.sendSystemMessage(Component.literal("Mobs will spawn in 5 seconds."));
+
+            plr.sendSystemMessage(Component.literal("Mobs will start to spawn soon!"));
         }
     }
 
@@ -135,6 +161,7 @@ public class ModEventHandler {
 
         for (int i = 0; i < players.size(); i++) {
             ServerPlayer plr = players.get(i);
+
             plr.sendSystemMessage(Component.literal("[Random Mobs Spawning]"));
             plr.sendSystemMessage(Component.literal("Mobs Spawning is currently disabled! Change this setting to \"true\" in the config to enable the mod."));
         }
@@ -142,10 +169,17 @@ public class ModEventHandler {
 
     @SubscribeEvent
     public static void onPlayerDied(PlayerEvent.PlayerRespawnEvent event) {
-        initialDelayApplied = false;
-        sentCloserAlert = false;
+        if (ismodEnabled) {
+            initialDelayApplied = false;
+            sentCloserAlert = false;
+            List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
-        event.getEntity().sendSystemMessage(Component.literal("Take a break, mobs will spawn in " + initialDelayConfig + " seconds."));
+            for (int i = 0; i < players.size(); i++) {
+                ServerPlayer plr = players.get(i);
+
+                plr.sendSystemMessage(Component.literal("Take a break, mobs will spawn in " + initialDelayConfig + " seconds."));
+            }
+        }
     }
 
     public static void updateInterval() {
@@ -270,7 +304,7 @@ public class ModEventHandler {
         } else if (mobChance <= 325) {
              if (endermiteEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(25) + 3;
+                     int amount = new Random().nextInt(15) + 3;
 
                      for (int i = 0; i < amount; i++) {
                          Endermite mite = EntityType.ENDERMITE.create(randomPlayer.level());
@@ -306,7 +340,7 @@ public class ModEventHandler {
         } else if (mobChance <= 600) {
              if (breezeEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(5) + 3;
+                     int amount = new Random().nextInt(5) + 1;
 
                      for (int i = 0; i < amount; i++) {
                          Breeze breeze = EntityType.BREEZE.create(randomPlayer.level());
@@ -324,7 +358,7 @@ public class ModEventHandler {
          } else if (mobChance <= 800) {
              if (chargedCreeperEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 5;
+                     int amount = new Random().nextInt(10) + 2;
 
                      for (int i = 0; i < amount; i++) {
                          Creeper creeper = EntityType.CREEPER.create(randomPlayer.level());
@@ -332,11 +366,11 @@ public class ModEventHandler {
 
                          if (creeper != null) {
                              bolt = EntityType.LIGHTNING_BOLT.create(creeper.level());
-                         }
 
-                         creeper.moveTo(randomPlayer.getX() + new Random().nextInt(10) - 5, randomPlayer.getY() + 2,
-                                 randomPlayer.getZ() + new Random().nextInt(10) - 5);
-                         randomPlayer.serverLevel().addFreshEntity(creeper);
+                             creeper.moveTo(randomPlayer.getX() + new Random().nextInt(10) - 5, randomPlayer.getY() + 2,
+                                     randomPlayer.getZ() + new Random().nextInt(10) - 5);
+                             randomPlayer.serverLevel().addFreshEntity(creeper);
+                         }
 
                          if (bolt != null) {
                              bolt.setDamage(0f);
@@ -351,7 +385,8 @@ public class ModEventHandler {
         }  else if (mobChance <= 875) {
              if (ghastEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 3;
+                     int amount = new Random().nextInt(10) + 1;
+
                      for (int i = 0; i < amount; i++) {
                          Ghast ghast = EntityType.GHAST.create(randomPlayer.level());
 
@@ -362,13 +397,14 @@ public class ModEventHandler {
                          }
                      }
 
-                     randomPlayer.sendSystemMessage(Component.literal(amount + " Ghasts spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
+                     randomPlayer.sendSystemMessage(Component.literal(amount + " Ghast spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
                  }
              }
         } else if (mobChance <= 920) {
              if (magmaCubeEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(6) + 2;
+                     int amount = new Random().nextInt(4) + 2;
+
                      for (int i = 0; i < amount; i++) {
                          MagmaCube cube = EntityType.MAGMA_CUBE.create(randomPlayer.level());
 
@@ -385,7 +421,7 @@ public class ModEventHandler {
          } else if (mobChance <= 1000) {
              if (witherskellyEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(5) + 6;
+                     int amount = new Random().nextInt(7) + 3;
 
                      for (int i = 0; i < amount; i++) {
                          WitherSkeleton wskele = EntityType.WITHER_SKELETON.create(randomPlayer.level());
@@ -404,7 +440,8 @@ public class ModEventHandler {
         } else if (mobChance <= 1050) {
              if (blazeEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(4) + 2;
+                     int amount = new Random().nextInt(4) + 1;
+
                      for (int i = 0; i < amount; i++) {
                          Blaze blaze = EntityType.BLAZE.create(randomPlayer.level());
 
@@ -415,13 +452,13 @@ public class ModEventHandler {
                          }
                      }
 
-                     randomPlayer.sendSystemMessage(Component.literal(amount + " Blazes spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
+                     randomPlayer.sendSystemMessage(Component.literal(amount + " Blaze spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
                  }
              }
          } else if (mobChance <= 1150) {
              if (boggedEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(5) + 6;
+                     int amount = new Random().nextInt(8) + 2;
 
                      for (int i = 0; i < amount; i++) {
                          Bogged bogged = EntityType.BOGGED.create(randomPlayer.level());
@@ -441,10 +478,12 @@ public class ModEventHandler {
          } else if (mobChance <= 1250) {
              if (babyzombieEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 5;
+                     int amount = new Random().nextInt(10) + 3;
 
-                     for (int i = 0; i < new Random().nextInt(10) + 5; i++) {
+                     for (int i = 0; i < amount; i++) {
                          int chance = new Random().nextInt(100);
+                         int helmet = new Random().nextInt(4);
+
                          Zombie zombie;
 
                          if (chance <= 50) {
@@ -457,7 +496,15 @@ public class ModEventHandler {
                              zombie.moveTo(randomPlayer.getX() + new Random().nextInt(10) - 5, randomPlayer.getY() + 2,
                                      randomPlayer.getZ() + new Random().nextInt(10) - 5);
                              zombie.setBaby(true);
-                             zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+
+                             if (helmet == 3) {
+                                 zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+                             } else if (helmet == 2) {
+                                 zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CHAINMAIL_HELMET));
+                             } else if (helmet == 1) {
+                                 zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+                             }
+
                              randomPlayer.serverLevel().addFreshEntity(zombie);
                          }
                      }
@@ -468,7 +515,7 @@ public class ModEventHandler {
          } else if (mobChance <= 1500) {
              if (phantomEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(15) + 5;
+                     int amount = new Random().nextInt(12) + 2;
 
                      for (int i = 0; i < amount; i++) {
                          Phantom phantom = EntityType.PHANTOM.create(randomPlayer.level());
@@ -504,7 +551,7 @@ public class ModEventHandler {
          } else if (mobChance <= 2500) {
              if (creeperEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 5;
+                     int amount = new Random().nextInt(10) + 3;
 
                      for (int i = 0; i < amount; i++) {
                          Creeper creeper = EntityType.CREEPER.create(randomPlayer.level());
@@ -522,7 +569,8 @@ public class ModEventHandler {
         } else if (mobChance <= 3000) {
              if (strayEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 5;
+                     int amount = new Random().nextInt(10) + 3;
+
                      for (int i = 0; i < amount; i++) {
                          Stray stray = EntityType.STRAY.create(randomPlayer.level());
 
@@ -544,6 +592,7 @@ public class ModEventHandler {
                      int amount = new Random().nextInt(10) + 5;
 
                      for (int i = 0; i < amount; i++) {
+                         int helmet = new Random().nextInt(4);
                          Skeleton skeleton = EntityType.SKELETON.create(randomPlayer.level());
 
                          if (skeleton != null) {
@@ -551,7 +600,15 @@ public class ModEventHandler {
                                      randomPlayer.getZ() + new Random().nextInt(10) - 5);
                              skeleton.equipItemIfPossible(new ItemStack(Items.BOW));
                              skeleton.setArrowCount(64);
-                             skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+
+                             if (helmet == 3) {
+                                 skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+                             } else if (helmet == 2) {
+                                 skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CHAINMAIL_HELMET));
+                             } else if (helmet == 1) {
+                                 skeleton.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+                             }
+
                              randomPlayer.serverLevel().addFreshEntity(skeleton);
                          }
                      }
@@ -562,7 +619,7 @@ public class ModEventHandler {
         } else if (mobChance <= 4000) {
              if (slimeEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(15) + 5;
+                     int amount = new Random().nextInt(15) + 3;
 
                      for (int i = 0; i < amount; i++) {
                          Slime slime = EntityType.SLIME.create(randomPlayer.level());
@@ -581,7 +638,7 @@ public class ModEventHandler {
         } else if (mobChance <= 4500) {
              if (huskEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 5;
+                     int amount = new Random().nextInt(10) + 3;
 
                      for (int i = 0; i < amount; i++) {
                          Husk husk = EntityType.HUSK.create(randomPlayer.level());;
@@ -599,10 +656,12 @@ public class ModEventHandler {
         } else if (mobChance <= 5000) {
              if (zombieEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 5;
+                     int amount = new Random().nextInt(12) + 3;
 
                      for (int i = 0; i < amount; i++) {
                          int chance = new Random().nextInt(100);
+                         int helmet = new Random().nextInt(4);
+
                          Zombie zombie;
 
                          if (chance <= 50) {
@@ -614,7 +673,15 @@ public class ModEventHandler {
                          if (zombie != null) {
                              zombie.moveTo(randomPlayer.getX() + new Random().nextInt(10) - 5, randomPlayer.getY() + 2,
                                      randomPlayer.getZ() + new Random().nextInt(10) - 5);
-                             zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+
+                             if (helmet == 3) {
+                                 zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.GOLDEN_HELMET));
+                             } else if (helmet == 2) {
+                                 zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.CHAINMAIL_HELMET));
+                             } else if (helmet == 1) {
+                                 zombie.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+                             }
+
                              randomPlayer.serverLevel().addFreshEntity(zombie);
                          }
                      }
@@ -625,7 +692,7 @@ public class ModEventHandler {
         } else if (mobChance <= 6000) {
              if (chickenEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(6) + 8;
+                     int amount = new Random().nextInt(6) + 4;
 
                      for (int i = 0; i < 15; i++) {
                          Chicken chicken = EntityType.CHICKEN.create(randomPlayer.level());
@@ -643,7 +710,7 @@ public class ModEventHandler {
         } else {
              if (pigEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(6) + 7;
+                     int amount = new Random().nextInt(6) + 4;
 
                      for (int i = 0; i < amount; i++) {
                          Pig pig = EntityType.PIG.create(randomPlayer.level());
