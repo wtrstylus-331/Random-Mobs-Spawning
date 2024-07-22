@@ -11,9 +11,3 @@ You deserve the 30 second headstart!
 
 ## Versions
 ### 1.21 ForgeLoader 51.0.17
-
-## Changelog
-### 0.7
-Conditionals edited to halt logic when Player is dead or on respawn screen.
-### 0.6
-Several more mobs added and chances tweaked for various mobs
