@@ -1,4 +1,4 @@
-<p align="center"><img src="main/java/resources/modlogo.png" alt="Logo" width="600"></p>
+<p align="center"><img src="main/java/resources/logofile.png" alt="Logo" width="500"></p>
 
 <h1 align="center">Random Mobs Spawning</h1>
 
