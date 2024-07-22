@@ -1,3 +1,4 @@
+<p align="center"><img src="main/java/resources/modlogo.png" alt="Logo" width="200"></p>
 # Random Mobs Spawning
 
 ## Description
