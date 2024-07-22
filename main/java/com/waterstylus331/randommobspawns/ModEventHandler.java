@@ -7,7 +7,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.breeze.Breeze;
@@ -39,7 +38,8 @@ public class ModEventHandler {
     private static boolean ismodEnabled;
     private static boolean sendAlertConfig = false;
 
-    private static boolean dragonEnabled;
+    private static boolean PLAYER_IN_SERVER = false;
+
     private static boolean wardenEnabled;
     private static boolean witherEnabled;
     private static boolean shulkerEnabled;
@@ -67,27 +67,29 @@ public class ModEventHandler {
     @SubscribeEvent
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            tickCounter++;
-
             if (ismodEnabled) {
-                if (!initialDelayApplied) {
-                    if (tickCounter >= initialDelay) {
-                        tickCounter = 0;
-                        initialDelayApplied = true;
-                    }
-                } else {
-                    if (!sentCloserAlert) {
-                        if (tickCounter >= initialCloserAlert) {
+                if (PLAYER_IN_SERVER) {
+                    tickCounter++;
+
+                    if (!initialDelayApplied) {
+                        if (tickCounter >= initialDelay) {
                             tickCounter = 0;
-                            sentCloserAlert = true;
-                            closerAlert();
+                            initialDelayApplied = true;
                         }
                     } else {
-                        if (tickCounter >= regularDelay) {
-                            tickCounter = 0;
+                        if (!sentCloserAlert) {
+                            if (tickCounter >= initialCloserAlert) {
+                                tickCounter = 0;
+                                sentCloserAlert = true;
+                                closerAlert();
+                            }
+                        } else {
+                            if (tickCounter >= regularDelay) {
+                                tickCounter = 0;
 
-                            if (Config.mobSpawnEnabled) {
-                                spawnMobs();
+                                if (Config.mobSpawnEnabled) {
+                                    spawnMobs();
+                                }
                             }
                         }
                     }
@@ -97,18 +99,31 @@ public class ModEventHandler {
     }
 
     @SubscribeEvent
-    public static void joined(PlayerEvent.PlayerLoggedInEvent event) {
-        initialDelayApplied = false;
-        sentCloserAlert = false;
+    public static void left(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (ismodEnabled) {
+            List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
+            if (players.isEmpty()) {
+                PLAYER_IN_SERVER = false;
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void joined(PlayerEvent.PlayerLoggedInEvent event) {
         if (ismodEnabled) {
             if (!event.getEntity().isDeadOrDying()) {
-                List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
+                if (!PLAYER_IN_SERVER) {
+                    PLAYER_IN_SERVER = true;
 
-                for (int i = 0; i < players.size(); i++) {
-                    ServerPlayer plr = players.get(i);
-                    plr.sendSystemMessage(Component.literal(event.getEntity().getGameProfile().getName() +
-                            " has joined! Mobs will continue to spawn in " + initialDelayConfig + " seconds!"));
+                    if (!sentInitialMessage) {
+                        List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
+
+                        for (int i = 0; i < players.size(); i++) {
+                            ServerPlayer plr = players.get(i);
+                            plr.sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
+                        }
+                    }
                 }
 
                 //event.getEntity().sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
@@ -167,21 +182,6 @@ public class ModEventHandler {
         }
     }
 
-    @SubscribeEvent
-    public static void onPlayerDied(PlayerEvent.PlayerRespawnEvent event) {
-        if (ismodEnabled) {
-            initialDelayApplied = false;
-            sentCloserAlert = false;
-            List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
-
-            for (int i = 0; i < players.size(); i++) {
-                ServerPlayer plr = players.get(i);
-
-                plr.sendSystemMessage(Component.literal("Take a break, mobs will spawn in " + initialDelayConfig + " seconds."));
-            }
-        }
-    }
-
     public static void updateInterval() {
         regularDelay = 20 * Config.intervalMobsSpawn;
         initialDelayConfig = Config.initialDelayHeadstart;
@@ -189,7 +189,6 @@ public class ModEventHandler {
     }
 
     public static void updatePermissions() {
-        dragonEnabled = Config.dragonEnabled;
         wardenEnabled = Config.wardenEnabled;
         witherEnabled = Config.witherEnabled;
         shulkerEnabled = Config.shulkerEnabled;
@@ -233,21 +232,7 @@ public class ModEventHandler {
         Random random = new Random();
         ServerPlayer randomPlayer = players.get(random.nextInt(players.size()));
 
-         if (mobChance <= 15) {
-             if (dragonEnabled) {
-                 if (!randomPlayer.isDeadOrDying()) {
-                     EnderDragon dragon = EntityType.ENDER_DRAGON.create(randomPlayer.level());
-
-                     if (dragon != null) {
-                         dragon.moveTo(randomPlayer.getX() + new Random().nextInt(10) - 5, randomPlayer.getY() + new Random().nextInt(20) + 10,
-                                 randomPlayer.getZ() + new Random().nextInt(10) - 5);
-                         randomPlayer.serverLevel().addFreshEntity(dragon);
-                     }
-
-                     randomPlayer.sendSystemMessage(Component.literal("Ender dragon spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
-                 }
-             }
-        } else if (mobChance <= 35) {
+         if (mobChance <= 35) {
              if (wardenEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
                      int amount = new Random().nextInt(2) + 1;
@@ -262,13 +247,13 @@ public class ModEventHandler {
                          }
                      }
 
-                     randomPlayer.sendSystemMessage(Component.literal(amount + " Wardens spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
+                     randomPlayer.sendSystemMessage(Component.literal(amount + " Warden spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
                  }
              }
         } else if (mobChance <= 100) {
              if (witherEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(2) + 1;
+                     int amount = new Random().nextInt(3) + 1;
 
                      for (int i = 0; i < amount; i++) {
                          WitherBoss witherBoss = EntityType.WITHER.create(randomPlayer.level());
@@ -283,7 +268,7 @@ public class ModEventHandler {
                      randomPlayer.sendSystemMessage(Component.literal(amount + " Withers spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
                  }
              }
-        } else if (mobChance <= 250) {
+        } else if (mobChance <= 270) {
              if (shulkerEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
                      int amount = new Random().nextInt(3) + 2;
@@ -301,7 +286,7 @@ public class ModEventHandler {
                      randomPlayer.sendSystemMessage(Component.literal(amount + " Shulkers spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
                  }
              }
-        } else if (mobChance <= 325) {
+        } else if (mobChance <= 355) {
              if (endermiteEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
                      int amount = new Random().nextInt(15) + 3;
