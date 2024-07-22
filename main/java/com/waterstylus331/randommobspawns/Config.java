@@ -44,6 +44,10 @@ public class Config
             .comment("Enable/Disable Piglin brute spawning.")
             .define("piglinBruteSpawning", true);
 
+    private static final ForgeConfigSpec.BooleanValue HOGLIN = BUILDER
+            .comment("Enable/Disable Hoglin spawning.")
+            .define("hoglinSpawning", true);
+
     private static final ForgeConfigSpec.BooleanValue BREEZE = BUILDER
             .comment("Enable/Disable Breeze spawning.")
             .define("breezeSpawning", true);
@@ -127,6 +131,7 @@ public class Config
     public static boolean shulkerEnabled;
     public static boolean endermiteEnabled;
     public static boolean bruteEnabled;
+    public static boolean hoglinEnabled;
     public static boolean breezeEnabled;
     public static boolean chargedCreeperEnabled;
     public static boolean ghastEnabled;
@@ -158,6 +163,7 @@ public class Config
         shulkerEnabled = SHULKER.get();
         endermiteEnabled = ENDERMITE.get();
         bruteEnabled = PIGLINBRUTE.get();
+        hoglinEnabled = HOGLIN.get();
         breezeEnabled = BREEZE.get();
         chargedCreeperEnabled = CHARGEDCREEPER.get();
         ghastEnabled = GHAST.get();
