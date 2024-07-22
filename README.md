@@ -9,4 +9,4 @@ You deserve the 30 second headstart!
 <h1 align="center"></h1>
 
 ## Current Versions
-### 1.21 ForgeLoader 51.0.17
+### 1.21
