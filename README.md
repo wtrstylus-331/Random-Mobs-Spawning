@@ -1,4 +1,4 @@
-<p align="center"><img src="main/java/resources/logofile.png" alt="Logo" width="500"></p>
+<p align="center"><img src="src/main/resources/logofile.png" alt="Logo" width="500"></p>
 <h1 align="center"></h1>
 This mod ensures chaos will ensue in your world, with random mobs spawning at a set interval of your choice.
 
