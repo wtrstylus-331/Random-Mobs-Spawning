@@ -10,6 +10,7 @@ import net.minecraft.world.entity.animal.Pig;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.*;
 import net.minecraft.world.entity.monster.breeze.Breeze;
+import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.monster.warden.Warden;
 import net.minecraft.world.item.ItemStack;
@@ -45,6 +46,7 @@ public class ModEventHandler {
     private static boolean shulkerEnabled;
     private static boolean endermiteEnabled;
     private static boolean bruteEnabled;
+    private static boolean hoglinEnabled;
     private static boolean breezeEnabled;
     private static boolean chargedCreeperEnabled;
     private static boolean ghastEnabled;
@@ -104,6 +106,8 @@ public class ModEventHandler {
             List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
             if (players.isEmpty()) {
+                sentInitialMessage = false;
+                sentCloserAlert = false;
                 PLAYER_IN_SERVER = false;
             }
         }
@@ -178,7 +182,7 @@ public class ModEventHandler {
             ServerPlayer plr = players.get(i);
 
             plr.sendSystemMessage(Component.literal("[Random Mobs Spawning]"));
-            plr.sendSystemMessage(Component.literal("Mobs Spawning is currently disabled! Change this setting to \"true\" in the config to enable the mod."));
+            plr.sendSystemMessage(Component.literal("Mobs Spawning is currently disabled! Change this setting to \"true\" in the server config to enable the mod."));
         }
     }
 
@@ -194,6 +198,7 @@ public class ModEventHandler {
         shulkerEnabled = Config.shulkerEnabled;
         endermiteEnabled = Config.endermiteEnabled;
         bruteEnabled = Config.bruteEnabled;
+        hoglinEnabled = Config.hoglinEnabled;
         breezeEnabled = Config.breezeEnabled;
         chargedCreeperEnabled = Config.chargedCreeperEnabled;
         ghastEnabled = Config.ghastEnabled;
@@ -307,7 +312,7 @@ public class ModEventHandler {
         } else if (mobChance <= 400) {
              if (bruteEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(5) + 2;
+                     int amount = new Random().nextInt(3) + 2;
 
                      for (int i = 0; i < amount; i++) {
                          PiglinBrute piglin = EntityType.PIGLIN_BRUTE.create(randomPlayer.level());
@@ -322,7 +327,25 @@ public class ModEventHandler {
                      randomPlayer.sendSystemMessage(Component.literal(amount + " Piglin brutes spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
                  }
              }
-        } else if (mobChance <= 600) {
+        } else if (mobChance <= 500) {
+             if (hoglinEnabled) {
+                 if (!randomPlayer.isDeadOrDying()) {
+                     int amount = new Random().nextInt(3) + 1;
+
+                     for (int i = 0; i < amount; i++) {
+                         Hoglin hoglin = EntityType.HOGLIN.create(randomPlayer.level());
+
+                         if (hoglin != null) {
+                             hoglin.moveTo(randomPlayer.getX() + new Random().nextInt(10) - 5, randomPlayer.getY() + 2,
+                                     randomPlayer.getZ() + new Random().nextInt(10) - 5);
+                             randomPlayer.serverLevel().addFreshEntity(hoglin);
+                         }
+                     }
+
+                     randomPlayer.sendSystemMessage(Component.literal(amount + " Hoglin spawned @ " + randomPlayer.getGameProfile().getName() + "!"));
+                 }
+             }
+         } else if (mobChance <= 600) {
              if (breezeEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
                      int amount = new Random().nextInt(5) + 1;
@@ -343,7 +366,7 @@ public class ModEventHandler {
          } else if (mobChance <= 800) {
              if (chargedCreeperEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 2;
+                     int amount = new Random().nextInt(6) + 2;
 
                      for (int i = 0; i < amount; i++) {
                          Creeper creeper = EntityType.CREEPER.create(randomPlayer.level());
@@ -370,7 +393,7 @@ public class ModEventHandler {
         }  else if (mobChance <= 875) {
              if (ghastEnabled) {
                  if (!randomPlayer.isDeadOrDying()) {
-                     int amount = new Random().nextInt(10) + 1;
+                     int amount = new Random().nextInt(6) + 1;
 
                      for (int i = 0; i < amount; i++) {
                          Ghast ghast = EntityType.GHAST.create(randomPlayer.level());
