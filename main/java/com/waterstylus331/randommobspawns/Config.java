@@ -22,13 +22,9 @@ public class Config
             .comment("Enable/Disable random mobs spawning at random times.")
             .define("mobSpawnsEnabled", false);
 
-    private static final ForgeConfigSpec.BooleanValue ENDERDRAGON = BUILDER
+    private static final ForgeConfigSpec.BooleanValue WARDEN = BUILDER
             .comment("")
             .comment("From top to bottom, least occurring to most occurring.")
-            .comment("Enable/Disable Ender Dragon spawning.")
-            .define("enderDragonSpawning", true);
-
-    private static final ForgeConfigSpec.BooleanValue WARDEN = BUILDER
             .comment("Enable/Disable Warden spawning.")
             .define("wardenSpawning", true);
 
@@ -126,7 +122,6 @@ public class Config
     public static boolean mobSpawnEnabled;
     public static int initialDelayHeadstart;
 
-    public static boolean dragonEnabled;
     public static boolean wardenEnabled;
     public static boolean witherEnabled;
     public static boolean shulkerEnabled;
@@ -158,7 +153,6 @@ public class Config
         intervalMobsSpawn = INTERVAL.get();
         initialDelayHeadstart = INITIAL_INTERVAL.get();
 
-        dragonEnabled = ENDERDRAGON.get();
         wardenEnabled = WARDEN.get();
         witherEnabled = WITHER.get();
         shulkerEnabled = SHULKER.get();
