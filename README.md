@@ -1,5 +1,6 @@
-<p align="center"><img src="main/java/resources/modlogo.png" alt="Logo" width="200"></p>
-# Random Mobs Spawning
+<p align="center"><img src="main/java/resources/modlogo.png" alt="Logo" width="600"></p>
+
+<h1 align="center">Random Mobs Spawning</h1>
 
 ## Description
 
