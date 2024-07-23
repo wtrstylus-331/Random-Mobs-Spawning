@@ -1,5 +1,6 @@
 package com.waterstylus331.randommobspawns;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
@@ -17,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -101,17 +103,27 @@ public class ModEventHandler {
     }
 
     @SubscribeEvent
+    public static void serverStopped(ServerStoppedEvent event) {
+        if (ismodEnabled) {
+            PLAYER_IN_SERVER = false;
+            reset();
+        }
+    }
+
+    /*
+    @SubscribeEvent
     public static void left(PlayerEvent.PlayerLoggedOutEvent event) {
         if (ismodEnabled) {
             List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
+            reset();
             if (players.isEmpty()) {
-                sentInitialMessage = false;
-                sentCloserAlert = false;
                 PLAYER_IN_SERVER = false;
             }
         }
     }
+
+     */
 
     @SubscribeEvent
     public static void joined(PlayerEvent.PlayerLoggedInEvent event) {
@@ -121,6 +133,8 @@ public class ModEventHandler {
                     PLAYER_IN_SERVER = true;
 
                     if (!sentInitialMessage) {
+                        sentInitialMessage = true;
+
                         List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
                         for (int i = 0; i < players.size(); i++) {
@@ -225,6 +239,13 @@ public class ModEventHandler {
         } else {
             ismodEnabled = false;
         }
+    }
+
+    private static void reset() {
+        initialDelayApplied = false;
+        sentInitialMessage = false;
+        sentCloserAlert = false;
+        tickCounter = 0;
     }
 
     private static void spawnMobs() {
