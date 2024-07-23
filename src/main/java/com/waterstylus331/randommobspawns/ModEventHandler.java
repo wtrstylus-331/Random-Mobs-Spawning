@@ -110,20 +110,20 @@ public class ModEventHandler {
         }
     }
 
-    /*
+
     @SubscribeEvent
     public static void left(PlayerEvent.PlayerLoggedOutEvent event) {
         if (ismodEnabled) {
             List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
-            reset();
-            if (players.isEmpty()) {
-                PLAYER_IN_SERVER = false;
+            for (int i = 0; i < players.size(); i++) {
+                ServerPlayer plr = players.get(i);
+                plr.sendSystemMessage(
+                        Component.literal(event.getEntity().getGameProfile().getName() + " has wimped out!")
+                );
             }
         }
     }
-
-     */
 
     @SubscribeEvent
     public static void joined(PlayerEvent.PlayerLoggedInEvent event) {
@@ -133,40 +133,15 @@ public class ModEventHandler {
                     PLAYER_IN_SERVER = true;
 
                     if (!sentInitialMessage) {
-                        sentInitialMessage = true;
-
                         List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
 
                         for (int i = 0; i < players.size(); i++) {
                             ServerPlayer plr = players.get(i);
                             plr.sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
                         }
+
+                        sentInitialMessage = true;
                     }
-                }
-
-                //event.getEntity().sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
-            }
-        } else {
-            if (!sendAlertConfig) {
-                sendModAlert();
-                sendAlertConfig = true;
-            }
-        }
-
-        /*
-        if (ismodEnabled) {
-            if (!sentInitialMessage) {
-                if (!event.getEntity().isDeadOrDying()) {
-                    List<ServerPlayer> players = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers();
-
-                    for (int i = 0; i < players.size(); i++) {
-                        ServerPlayer plr = players.get(i);
-                        plr.sendSystemMessage(Component.literal(event.getEntity().getGameProfile().getName() +
-                                " joined! Mobs will continue to spawn in " + initialDelayConfig + " seconds!"));
-                    }
-
-                    event.getEntity().sendSystemMessage(Component.literal("Mobs will spawn in " + initialDelayConfig + " seconds!"));
-                    sentInitialMessage = true;
                 }
             }
         } else {
@@ -175,8 +150,6 @@ public class ModEventHandler {
                 sendAlertConfig = true;
             }
         }
-
-         */
     }
 
     private static void closerAlert() {
