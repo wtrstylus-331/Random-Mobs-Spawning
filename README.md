@@ -8,5 +8,5 @@ Each mob has their own chance of spawning, with more damaging and tougher mobs (
 You deserve the 30 second headstart!
 <h1 align="center"></h1>
 
-## Current Versions
-### 1.21
+<p align="center"><img alt="Versions" src="https://img.shields.io/badge/Supported%20Versions-1.21-red"></p>
+
