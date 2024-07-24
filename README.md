@@ -7,6 +7,8 @@ Each mob has their own chance of spawning, with more damaging and tougher mobs (
 
 You deserve the 30 second headstart!
 <h1 align="center"></h1>
-
-<p align="center"><img alt="Versions" src="https://img.shields.io/badge/Supported%20Versions-1.21_|_1.20.1-red"></p>
-
+<h2 align="center" style="bold">Supported Versions</h2>
+<p align="center">
+  <a href="https://github.com/wtrstylus-331/random_mobs_spawning/tree/1.21build"><img alt="1.21" src="https://img.shields.io/badge/1.21-red"></a>
+  <a href="https://github.com/wtrstylus-331/random_mobs_spawning/tree/1.20.1build"><img alt="1.20.1" src="https://img.shields.io/badge/1.20.1-red"></a>
+</p>
